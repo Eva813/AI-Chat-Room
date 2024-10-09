@@ -14,6 +14,10 @@ export default function ChatPage() {
 
     // 清空輸入框
     setInputMessage('');
+     // 重置 textarea 高度
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
 
     // 添加用戶訊息到對話列表
     const userMessage = {
