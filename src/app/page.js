@@ -2,13 +2,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
-import Prism from 'prismjs';  // Import Prism.js for syntax highlighting
 import "prismjs/themes/prism.css";  // Import Prism.js CSS
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { okaidia as theme } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import dayjs from 'dayjs';
 import remarkGfm from 'remark-gfm';
-import { IconName, FaAngleLeft, FaAngleRight } from "react-icons/fa6";
+import { FaAngleLeft, FaAngleRight } from "react-icons/fa6";
 
 const components = {
   code({ node, inline, className, children, ...props }) {
@@ -87,10 +86,10 @@ export default function ChatPage() {
       )
     );
 
-     // 第一次發送消息後，根據內容生成對話標題
-    if (currentSession.messages.length === 0) {
-      await generateTitleForConversation(userMessage.content);
-    }
+    //  // 第一次發送消息後，根據內容生成對話標題
+    // if (currentSession.messages.length === 0) {
+    //   await generateTitleForConversation(userMessage.content);
+    // }
 
     setIsLoading(true);
 
@@ -175,6 +174,7 @@ export default function ChatPage() {
       if (generatedTitle.length > 30) {
         generatedTitle = generatedTitle.slice(0, 30) + "...";
       }
+      console.log("Generated title:", generatedTitle);
 
       // 更新對話的標題
       setSessions((prevSessions) =>
