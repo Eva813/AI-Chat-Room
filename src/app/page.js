@@ -197,42 +197,43 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex">
+    <div className="h-screen bg-gray-100 flex overflow-hidden">
       {/* Left Sidebar */}
-      {isSidebarOpen && (<><div className="w-1/4 bg-olive-lightest p-4">
-      <h2 className="text-xl font-bold mb-4">Chat list</h2>
-        <button
-          onClick={createNewChat}
-          className="w-full bg-olive-light text-white p-2 rounded-lg mb-4 hover:bg-olive"
-        >
-          New Chat
-        </button>
-        <ul>
-          {sessions.map((session) => (
-            <li
-              key={session.id}
-              className={`p-2 mb-2 cursor-pointer rounded-lg ${
-                session.id === currentSessionId
-                  ? "bg-olive-light text-white"
-                  : "bg-white text-black"
-              }`}
-              onClick={() => setCurrentSessionId(session.id)}
+      {isSidebarOpen && (<>
+        <div className="w-1/4 bg-olive-lightest overflow-y-auto p-4">
+          <h2 className="text-xl font-bold mb-4">Chat list</h2>
+            <button
+              onClick={createNewChat}
+              className="w-full bg-olive-light text-white p-2 rounded-lg mb-4 hover:bg-olive"
             >
-              <div>{session.name}</div>
-              <div className={`text-sm ${
-                session.id === currentSessionId
-                  ? "text-white"
-                  : "text-black"
-              }`}>
-                Created: {timestamps[session.id] || "Loading..."}
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div></>)}
+              New Chat
+            </button>
+            <ul>
+              {sessions.map((session) => (
+                <li
+                  key={session.id}
+                  className={`p-2 mb-2 cursor-pointer rounded-lg ${
+                    session.id === currentSessionId
+                      ? "bg-olive-light text-white"
+                      : "bg-white text-black"
+                  }`}
+                  onClick={() => setCurrentSessionId(session.id)}
+                >
+                  <div>{session.name}</div>
+                  <div className={`text-sm ${
+                    session.id === currentSessionId
+                      ? "text-white"
+                      : "text-black"
+                  }`}>
+                    Created: {timestamps[session.id] || "Loading..."}
+                  </div>
+                </li>
+              ))}
+            </ul>
+        </div></>)}
 
       {/* Chat window */}
-      <div className={`${isSidebarOpen ? "w-3/4" : "w-full"} bg-white p-2 flex flex-col`}>
+      <div className={`${isSidebarOpen ? "w-3/4" : "w-full"} bg-white flex flex-col p-2`}>
         <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="w-10 bg-olive-light text-white p-2 rounded-lg mb-4 hover:bg-olive"
