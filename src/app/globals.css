@@ -44,7 +44,21 @@ body {
   font-size: 14px;
   line-height: 1.4;
 }
+.custom-markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
 
+.custom-markdown th, .custom-markdown td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.custom-markdown th {
+  background-color: #f2f2f2;
+  text-align: left;
+}
 /* 
 .custom-markdown p {
   margin: 0 0 10px;

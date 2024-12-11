@@ -1,4 +1,4 @@
-"use client";  // Add this at the very top to mark the component as a Client Component
+"use client";
 
 import { useState, useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
@@ -7,6 +7,8 @@ import "prismjs/themes/prism.css";  // Import Prism.js CSS
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { okaidia as theme } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import dayjs from 'dayjs';
+import remarkGfm from 'remark-gfm';
+import { IconName, FaAngleLeft, FaAngleRight } from "react-icons/fa6";
 
 const components = {
   code({ node, inline, className, children, ...props }) {
@@ -33,7 +35,7 @@ export default function ChatPage() {
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const textareaRef = useRef(null);
-  
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   // Update all timestamps
   useEffect(() => {
@@ -76,6 +78,7 @@ export default function ChatPage() {
       textareaRef.current.style.height = "auto";
     }
 
+    // 更新當前對話的用戶消息
     setSessions((prevSessions) =>
       prevSessions.map((session) =>
         session.id === currentSessionId
@@ -83,6 +86,11 @@ export default function ChatPage() {
           : session
       )
     );
+
+     // 第一次發送消息後，根據內容生成對話標題
+    if (currentSession.messages.length === 0) {
+      await generateTitleForConversation(userMessage.content);
+    }
 
     setIsLoading(true);
 
@@ -93,7 +101,7 @@ export default function ChatPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          messages: [{ role: "user", content: inputMessage }],
+          messages: [...currentSession.messages, userMessage],
         }),
       });
 
@@ -102,10 +110,11 @@ export default function ChatPage() {
       const processedContent = data.choices[0].message.content.replace(/\n\s*\n/g, '\n'); // Replace excessive newlines
       const assistantMessage = {
         role: "assistant",
-        content: processedContent,  // Use the processed content
+        content: processedContent,
         timestamp: Date.now(),
       };
 
+      // 更新當前對話的助理消息
       setSessions((prevSessions) =>
         prevSessions.map((session) =>
           session.id === currentSessionId
@@ -121,6 +130,7 @@ export default function ChatPage() {
         timestamp: Date.now(),
       };
 
+      // 更新當前對話的錯誤消息
       setSessions((prevSessions) =>
         prevSessions.map((session) =>
           session.id === currentSessionId
@@ -143,6 +153,42 @@ export default function ChatPage() {
     }
   };
 
+  const generateTitleForConversation = async (userMessage) => {
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messages: [
+            { role: "system", content: "Please generate a short and clear title (no more than 30 characters) for the following message." },
+            { role: "user", content: userMessage }
+          ],
+        }),
+      });
+
+      const data = await response.json();
+      let generatedTitle = data.choices[0].message.content.trim();
+  
+      // 確保標題不超過 30 個字符，並在過長時進行截斷
+      if (generatedTitle.length > 30) {
+        generatedTitle = generatedTitle.slice(0, 30) + "...";
+      }
+
+      // 更新對話的標題
+      setSessions((prevSessions) =>
+        prevSessions.map((session) =>
+          session.id === currentSessionId
+            ? { ...session, name: generatedTitle }
+            : session
+        )
+      );
+    } catch (error) {
+      console.error("Error generating conversation title:", error);
+    }
+  };
+
   const handleInput = () => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -153,11 +199,11 @@ export default function ChatPage() {
   return (
     <div className="min-h-screen bg-gray-100 flex">
       {/* Left Sidebar */}
-      <div className="w-1/4 bg-gray-200 p-4">
-        <h2 className="text-xl font-bold mb-4">會話列表</h2>
+      {isSidebarOpen && (<><div className="w-1/4 bg-olive-lightest p-4">
+      <h2 className="text-xl font-bold mb-4">Chat list</h2>
         <button
           onClick={createNewChat}
-          className="w-full bg-blue-500 text-white p-2 rounded-lg mb-4 hover:bg-blue-600"
+          className="w-full bg-olive-light text-white p-2 rounded-lg mb-4 hover:bg-olive"
         >
           New Chat
         </button>
@@ -167,27 +213,38 @@ export default function ChatPage() {
               key={session.id}
               className={`p-2 mb-2 cursor-pointer rounded-lg ${
                 session.id === currentSessionId
-                  ? "bg-blue-500 text-white"
+                  ? "bg-olive-light text-white"
                   : "bg-white text-black"
               }`}
               onClick={() => setCurrentSessionId(session.id)}
             >
               <div>{session.name}</div>
-              <div className="text-sm text-gray-500">
+              <div className={`text-sm ${
+                session.id === currentSessionId
+                  ? "text-white"
+                  : "text-black"
+              }`}>
                 Created: {timestamps[session.id] || "Loading..."}
               </div>
             </li>
           ))}
         </ul>
-      </div>
+      </div></>)}
 
       {/* Chat window */}
-      <div className="w-3/4 bg-white p-6 flex flex-col">
+      <div className={`${isSidebarOpen ? "w-3/4" : "w-full"} bg-white p-2 flex flex-col`}>
+        <button
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="w-10 bg-olive-light text-white p-2 rounded-lg mb-4 hover:bg-olive"
+          >
+            {isSidebarOpen ? <FaAngleLeft /> : <FaAngleRight />}
+
+          </button>
         <h1 className="text-2xl font-bold mb-4 text-center">
-          Chat {currentSessionId}
+            {currentSession?.name || `Chat ${currentSessionId}`}
         </h1>
 
-        <div className="flex-grow overflow-y-auto max-h-96 mb-4 p-4 bg-gray-50 rounded-lg shadow-inner">
+        <div className="flex-grow overflow-y-auto max-h-dvh mb-4 p-4 bg-gray-50 rounded-lg shadow-inner">
           {currentSession.messages.map((message, index) => (
             <div
               key={index}
@@ -197,12 +254,12 @@ export default function ChatPage() {
             >
               <div>
                 {message.role === "user" ? (
-                  <p className="inline-block p-3 rounded-lg whitespace-normal leading-relaxed bg-blue-500 text-white">
+                  <p className="inline-block p-3 rounded-lg whitespace-normal leading-relaxed bg-olive-light text-white">
                     {message.content}
                   </p>
                 ) : (
-                  <div className="inline-block p-3 rounded-lg whitespace-normal leading-[1.8] bg-white text-gray-900 border border-gray-300">
-                    <ReactMarkdown className="custom-markdown" components={components}>{message.content}</ReactMarkdown>
+                  <div className="inline-block p-3 rounded-lg whitespace-normal leading-[1.8] bg-white text-[#66785F]-900 border border-gray-300">
+                    <ReactMarkdown className="custom-markdown" components={components} remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
                   </div>
                 )}
               </div>
@@ -234,8 +291,8 @@ export default function ChatPage() {
           />
           <button
             type="submit"
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
-            disabled={isLoading}
+            className="bg-olive-light text-white px-4 py-2 rounded-lg hover:bg-olive transition"
+            disabled={isLoading || !inputMessage.trim()}
           >
             {isLoading ? "等待中..." : "Send"}
           </button>
