@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export default async function handler(req, res) {
-  const apiBaseUrl = "https://web-tech-tw.eu.org/openai/v1";
+  const apiBaseUrl = "https://web-tech.tw/recv/openai/v1";
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (req.method === 'POST') {
