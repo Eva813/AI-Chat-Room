@@ -2,6 +2,7 @@
 'use client';
 import { createContext, useContext, useState } from 'react';
 
+
 const SnippetsContext = createContext();
 
 export function SnippetsProvider({ children }) {
@@ -10,8 +11,8 @@ export function SnippetsProvider({ children }) {
       id: 'HplOMyf2mDqvVMdphJbt',
       name: 'My Sample Snippets',
       snippets: [
-        { id: '5mJw031VPo2WxNIQyeXN', name: 'Demo - Plain text', content: 'play a software egineer' , shortcut: '/do' },
-        { id: '6mJw031VPo2WxNIQyeYN', name: 'Demo - Styled Text', content: 'play a translate expert, I will give you a sentence and help me translate to english', shortcut: '/doT' },
+        { id: '5mJw031VPo2WxNIQyeXN', name: 'Demo - Plain text', content: 'be a software egineer' , shortcut: '/do' },
+        { id: '6mJw031VPo2WxNIQyeYN', name: 'Demo - Styled Text', content: 'be a translate expert, I will give you a sentence and help me translate to english', shortcut: '/doT' },
       ],
     },
   ]);
@@ -23,6 +24,6 @@ export function SnippetsProvider({ children }) {
   );
 }
 
-export function useSnippets() {
-  return useContext(SnippetsContext);
-}
+export const useSnippets = () => {
+    return useContext(SnippetsContext);
+  };

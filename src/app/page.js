@@ -8,6 +8,8 @@ import { okaidia as theme } from 'react-syntax-highlighter/dist/cjs/styles/prism
 import dayjs from 'dayjs';
 import remarkGfm from 'remark-gfm';
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6";
+import { useSnippets } from './snippets/SnippetsContext';
+
 
 const components = {
   code({ node, inline, className, children, ...props }) {
@@ -61,14 +63,27 @@ export default function ChatPage() {
 
   const currentSession = sessions.find((session) => session.id === currentSessionId);
 
+  const { folders } = useSnippets();
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!inputMessage.trim()) return;
+    let message = inputMessage.trim();
+    if (!message) return;
+
+      // 查找與用戶輸入相符的 snippet
+      const allSnippets = folders.flatMap(folder => folder.snippets);
+      // 依需求自行定義匹配邏輯，比如完全匹配，或前綴匹配
+      const snippet = allSnippets.find(s => message === s.shortcut);
+      if (snippet) {
+        // 只更新輸入框顯示的內容，不送出訊息
+        setInputMessage(snippet.content);
+        return; // 中止函式，不送出
+      }
+
 
     const userMessage = {
       role: "user",
-      content: inputMessage,
+      content: message,
       timestamp: Date.now(),
     };
 
