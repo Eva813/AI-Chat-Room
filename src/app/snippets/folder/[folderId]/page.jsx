@@ -1,21 +1,11 @@
 "use client";
 // pages/snippets/folder/[id].tsx
 import Link from 'next/link';
-
+import { useSnippets } from '../../SnippetsContext';
 
 const FolderPage = ({ params }) => {
   const { folderId } = params;
-
-  const folders = [
-    {
-      id: 'HplOMyf2mDqvVMdphJbt',
-      name: 'My Sample Snippets',
-      snippets: [
-        { id: '5mJw031VPo2WxNIQyeXN', name: 'Demo - Plain text' },
-        { id: '6mJw031VPo2WxNIQyeYN', name: 'Demo - Styled Text' },
-      ],
-    },
-  ];
+  const { folders } = useSnippets();
 
   const currentFolder = folders.find(folder => folder.id === folderId);
 
@@ -26,15 +16,8 @@ const FolderPage = ({ params }) => {
   return (
     <div>
       <h1>{currentFolder.name}</h1>
-      {/* <ul>
-        {currentFolder.snippets.map(snippet => (
-          <li key={snippet.id}>
-            <Link href={`/snippets/snippet/${snippet.id}`}>
-              {snippet.name}
-            </Link>
-          </li>
-        ))}
-      </ul> */}
+      {/* 可以在這裡加入編輯區塊的邏輯，例如預設畫面 */}
+      {/* <textarea defaultValue="Default folder edit content" /> */}
     </div>
   );
 };
